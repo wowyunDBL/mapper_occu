@@ -204,7 +204,7 @@ protected:
       //H += Eigen::Matrix3f::Identity() * 1.0f;
       Eigen::Vector3f searchDir (H.inverse() * dTr);
 
-      //std::cout << "\nsearchdir\n" << searchDir  << "\n";
+      std::cout << "\n in estimateTransformationLogLh: searchdir: " << searchDir  << "\n";
 
       if (searchDir[2] > 0.2f) {
         searchDir[2] = 0.2f;

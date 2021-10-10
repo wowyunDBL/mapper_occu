@@ -185,7 +185,8 @@ public:
     int x1 = endMap[0];
     int y1 = endMap[1];
 
-    //std::cout << " x: "<< x1 << " y: " << y1 << " length: " << length << "     ";
+    // std::cout << " x1: "<< x1 << " y1: " << y1 << "\n";
+    // std::cout << " x0: "<< x0 << " y0: " << y0 << "\n";
 
     //check if beam end point is inside map, cancel update if this is not the case
     if ((x1 < 0) || (x1 >= this->getSizeX()) || (y1 < 0) || (y1 >= this->getSizeY())) {
@@ -212,10 +213,10 @@ public:
       int error_x = abs_dy / 2;
       bresenham2D(abs_dy, abs_dx, error_x, offset_dy, offset_dx, startOffset);
     }
-
-    if(abs_dx*abs_dx+abs_dy*abs_dy < 10000)
+    // std::cout << " setOcc! " << abs_dx <<' ' << abs_dy <<"\n";
+    if(abs_dx*abs_dx+abs_dy*abs_dy < (7*20)*(7*20) )  // this is in grid lenght!!!!
     {
-      //std::cout << " setOcc " << "\n";
+      
       unsigned int endOffset = endMap.y() * this->sizeX + endMap.x();
       this->bresenhamCellOcc(endOffset);
     }

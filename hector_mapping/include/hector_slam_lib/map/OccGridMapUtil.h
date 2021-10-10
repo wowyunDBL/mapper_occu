@@ -64,6 +64,7 @@ public:
   void getCompleteHessianDerivs(const Eigen::Vector3f& pose, const DataContainer& dataPoints, Eigen::Matrix3f& H, Eigen::Vector3f& dTr)
   {
     int size = dataPoints.getSize();
+    std::cout << "in getCompleteHessianDerivs: dataPoints number: " << size << '\n';
 
     Eigen::Affine2f transform(getTransformForState(pose));
 
@@ -328,7 +329,7 @@ public:
       intensities[3] = getUnfilteredGridPoint(index);
       cacheMethod.cacheData(index, intensities[3]);
     }
-
+    // std::cout<<"interpMapValueWithDerivatives: intensities: " << intensities << '\n';
     float dx1 = intensities[0] - intensities[1];
     float dx2 = intensities[2] - intensities[3];
 
