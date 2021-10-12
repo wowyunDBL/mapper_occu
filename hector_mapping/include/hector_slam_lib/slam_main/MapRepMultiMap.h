@@ -89,6 +89,15 @@ public:
     }
   }
 
+  void initial_map_from_csv()
+  {
+    unsigned int size = mapContainer.size();
+
+    for (unsigned int i = 0; i < size; ++i){
+      mapContainer[i].initial_map_from_csv();
+    }
+  }
+
   virtual float getScaleToMap() const { return mapContainer[0].getScaleToMap(); };
 
   virtual int getMapLevels() const { return mapContainer.size(); };

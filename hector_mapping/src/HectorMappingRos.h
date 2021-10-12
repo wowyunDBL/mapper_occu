@@ -203,6 +203,8 @@ protected:
   float p_sqr_laser_max_dist_;
   float p_laser_z_min_value_;
   float p_laser_z_max_value_;
+
+  int count;
 };
 
 #endif

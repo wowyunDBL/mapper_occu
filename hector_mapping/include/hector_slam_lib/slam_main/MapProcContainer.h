@@ -70,6 +70,11 @@ public:
     gridMapUtil->resetCachedData();
   }
 
+  void initial_map_from_csv()
+  {
+    gridMap->initial_map_from_csv();
+  }
+
   void resetCachedData()
   {
     gridMapUtil->resetCachedData();

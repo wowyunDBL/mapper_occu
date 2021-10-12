@@ -58,6 +58,7 @@ public:
     mapRep = new MapRepMultiMap(mapResolution, mapSizeX, mapSizeY, multi_res_size, startCoords, drawInterfaceIn, debugInterfaceIn);
 
     this->reset();
+    this->initial_map_from_csv();
 
     this->setMapUpdateMinDistDiff(0.4f *1.0f);
     this->setMapUpdateMinAngleDiff(0.13f * 1.0f);
@@ -70,12 +71,14 @@ public:
 
   void update(const DataContainer& dataContainer, const Eigen::Vector3f& poseHintWorld, bool map_without_matching = false)
   {
-    //std::cout << "\nph:\n" << poseHintWorld << "\n";
+    // std::cout << "\nph:\n" << poseHintWorld << "\n";
 
     Eigen::Vector3f newPoseEstimateWorld;
 
     if (!map_without_matching){
+        // std::cout << "poseHintWorld: " << poseHintWorld << '\n';
         newPoseEstimateWorld = (mapRep->matchData(poseHintWorld, dataContainer, lastScanMatchCov));
+        std::cout<<"final updated pose: " << newPoseEstimateWorld << '\n';
     }else{
         newPoseEstimateWorld = poseHintWorld;
     }
@@ -86,8 +89,9 @@ public:
 
     //std::cout << "\n1";
     //std::cout << "\n" << lastScanMatchPose << "\n";
-    if(util::poseDifferenceLargerThan(newPoseEstimateWorld, lastMapUpdatePose, paramMinDistanceDiffForMapUpdate, paramMinAngleDiffForMapUpdate) || map_without_matching){
-
+    // if(util::poseDifferenceLargerThan(newPoseEstimateWorld, lastMapUpdatePose, paramMinDistanceDiffForMapUpdate, paramMinAngleDiffForMapUpdate) || map_without_matching){
+    if(true){
+      std::cout << "updating map every time!" << '\n';
       mapRep->updateByScan(dataContainer, newPoseEstimateWorld);
 
       mapRep->onMapUpdated();
@@ -121,6 +125,11 @@ public:
     //lastScanMatchPose.z() = M_PI*0.15f;
 
     mapRep->reset();
+  }
+
+  void initial_map_from_csv()
+  {
+    mapRep->initial_map_from_csv();
   }
 
   const Eigen::Vector3f& getLastScanMatchPose() const { return lastScanMatchPose; };

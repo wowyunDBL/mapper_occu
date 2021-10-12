@@ -71,6 +71,15 @@ public:
     this->clear();
   }
 
+  void initial_map_from_csv()
+  {
+    int size = this->getSizeX() * this->getSizeY();
+    for (int i=0; i<size; i++)
+    {
+      this->mapArray[i].set();
+    }
+  }
+
   /**
    * Resets the grid cell values by using the resetGridCell() function.
    */

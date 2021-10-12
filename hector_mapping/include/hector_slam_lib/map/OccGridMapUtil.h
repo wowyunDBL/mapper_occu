@@ -61,49 +61,6 @@ public:
 
   inline Eigen::Vector2f getWorldCoordsPoint(const Eigen::Vector2f& mapPoint) const { return concreteGridMap->getWorldCoords(mapPoint); };
 
-  void getCompleteHessianDerivs(const Eigen::Vector3f& pose, const DataContainer& dataPoints, Eigen::Matrix3f& H, Eigen::Vector3f& dTr)
-  {
-    int size = dataPoints.getSize();
-    std::cout << "in getCompleteHessianDerivs: dataPoints number: " << size << '\n';
-
-    Eigen::Affine2f transform(getTransformForState(pose));
-
-    float sinRot = sin(pose[2]);
-    float cosRot = cos(pose[2]);
-
-    H = Eigen::Matrix3f::Zero();
-    dTr = Eigen::Vector3f::Zero();
-
-    for (int i = 0; i < size; ++i) {
-
-      const Eigen::Vector2f& currPoint (dataPoints.getVecEntry(i));
-
-      Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(transform * currPoint));
-
-      float funVal = 1.0f - transformedPointData[0];
-
-      dTr[0] += transformedPointData[1] * funVal;
-      dTr[1] += transformedPointData[2] * funVal;
-
-      float rotDeriv = ((-sinRot * currPoint.x() - cosRot * currPoint.y()) * transformedPointData[1] + (cosRot * currPoint.x() - sinRot * currPoint.y()) * transformedPointData[2]);
-
-      dTr[2] += rotDeriv * funVal;
-
-      H(0, 0) += util::sqr(transformedPointData[1]);
-      H(1, 1) += util::sqr(transformedPointData[2]);
-      H(2, 2) += util::sqr(rotDeriv);
-
-      H(0, 1) += transformedPointData[1] * transformedPointData[2];
-      H(0, 2) += transformedPointData[1] * rotDeriv;
-      H(1, 2) += transformedPointData[2] * rotDeriv;
-    }
-
-    H(1, 0) = H(0, 1);
-    H(2, 0) = H(0, 2);
-    H(2, 1) = H(1, 2);
-
-  }
-
   Eigen::Matrix3f getCovarianceForPose(const Eigen::Vector3f& mapPose, const DataContainer& dataPoints)
   {
 
@@ -282,6 +239,58 @@ public:
     return
       ((intensities[0] * xFacInv + intensities[1] * factors[0]) * (yFacInv)) +
       ((intensities[2] * xFacInv + intensities[3] * factors[0]) * (factors[1]));
+
+  }
+
+  void getCompleteHessianDerivs(const Eigen::Vector3f& pose, const DataContainer& dataPoints, Eigen::Matrix3f& H, Eigen::Vector3f& dTr)
+  {
+    int size = dataPoints.getSize();
+    // std::cout << "in getCompleteHessianDerivs: dataPoints number: " << size << '\n';
+
+    Eigen::Affine2f transform(getTransformForState(pose));
+
+    float sinRot = sin(pose[2]);
+    float cosRot = cos(pose[2]);
+
+    H = Eigen::Matrix3f::Zero();
+    dTr = Eigen::Vector3f::Zero();
+
+    float cost=0;
+
+    for (int i = 0; i < size; ++i) {
+      // std::cout<<"getCompleteHessianDerivs times: " << i << '\n';
+      const Eigen::Vector2f& currPoint (dataPoints.getVecEntry(i));
+      
+      if (currPoint.norm() > 6.8*20){
+        // std::cout<<"exceed range!" << '\n';
+        continue;
+      }
+      // std::cout<<currPoint.norm() << '\n';
+      Eigen::Vector3f transformedPointData(interpMapValueWithDerivatives(transform * currPoint));
+
+      float funVal = 1.0f - transformedPointData[0];
+      // std::cout << "transformedPointData[0]: " << transformedPointData[0] << '\n';
+      cost += funVal;
+
+      dTr[0] += transformedPointData[1] * funVal;
+      dTr[1] += transformedPointData[2] * funVal;
+
+      float rotDeriv = ((-sinRot * currPoint.x() - cosRot * currPoint.y()) * transformedPointData[1] + (cosRot * currPoint.x() - sinRot * currPoint.y()) * transformedPointData[2]);
+
+      dTr[2] += rotDeriv * funVal;
+
+      H(0, 0) += util::sqr(transformedPointData[1]);
+      H(1, 1) += util::sqr(transformedPointData[2]);
+      H(2, 2) += util::sqr(rotDeriv);
+
+      H(0, 1) += transformedPointData[1] * transformedPointData[2];
+      H(0, 2) += transformedPointData[1] * rotDeriv;
+      H(1, 2) += transformedPointData[2] * rotDeriv;
+    }
+    std::cout << "cost: " << cost << '\n';
+    H(1, 0) = H(0, 1);
+    H(2, 0) = H(0, 2);
+    H(2, 1) = H(1, 2);
 
   }
 

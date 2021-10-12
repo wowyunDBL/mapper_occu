@@ -52,6 +52,7 @@ HectorMappingRos::HectorMappingRos()
   , map__publish_thread_(0)
   , initial_pose_set_(false)
   , pause_scan_processing_(false)
+  , count(1)
 {
   //
   ros::NodeHandle private_nh_("~");
@@ -221,6 +222,10 @@ HectorMappingRos::~HectorMappingRos()
 void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
 {
   bool flag=false;
+  count+=1;
+  std::cout << "******* New Callback *******" << count << '\n';
+  // if (count >2)
+  //   return;
   if (pause_scan_processing_)
   {
     return;
@@ -316,23 +321,35 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     }*/
     /*std::cout<<"size is: " << size << '\n';*/
     
-    if (size<15)
-      flag = false;
+    int c =0;
+    for (int i=0;i<size;i++){
+      const Eigen::Vector2f& currPoint (laserScanContainer.getVecEntry(i));
+      if (currPoint.norm() < 6.8*20){
+        c += 1;
+        if (c > 10){
+          flag = true;
+          break;
+        }
+      }
+    }
+
     // If "p_map_with_known_poses_" is enabled, we assume that start_estimate is precise and doesn't need to be refined
     if (p_map_with_known_poses_)
     {
       if (!flag)  /**/
       {
-      //std::cout << "with_known_poses, size is: " << size << '\n';
+      std::cout << "with_known_poses(no < 7m), total size is: " << size <<"; matching size is: " << c << '\n';
       slamProcessor->update(laserScanContainer, start_estimate, true);
       }
       else{
-        //std::cout << "scan matching... " << '\n';
+        std::cout << "scan matching..., total size is:  " << size <<"; matching size is: " << c <<'\n';
         slamProcessor->update(laserScanContainer, start_estimate);
       }
     }
     else
     {
+      std::cout << "scan callback!" << count << '\n';
+      std::cout << "start_estimate: " << start_estimate << '\n';
       slamProcessor->update(laserScanContainer, start_estimate);
     }
   }
@@ -345,16 +362,6 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
   }
   
   // If we're just building a map with known poses, we're finished now. Code below this point publishes the localization results.
-  if (p_map_with_known_poses_)
-  {
-    if (!flag)  /**/
-    {
-      //std::cout << "# of scan < 5... " << '\n';
-      return;
-    }
-    //std::cout << "# of scan > 5... " << '\n';
-  }
-
   poseInfoContainer_.update(slamProcessor->getLastScanMatchPose(), slamProcessor->getLastScanMatchCovariance(), scan.header.stamp, p_map_frame_);
 
   // Publish pose with and without covariances
@@ -471,12 +478,13 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
     {
       mapMutex->lockMap();
     }
-    /*std::ofstream newFile;
-    newFile.open("./0816_test1.txt", std::ios::out | std::ios::trunc);
-    if(!newFile)     
-      std::cout << "Can't open file!\n";
-    else
-      std::cout<<"File open successfully!\n";*/
+
+    // std::ofstream newFile;
+    // newFile.open("/home/anny/gridValue.csv", std::ios::out | std::ios::trunc);
+    // if(!newFile)     
+    //   std::cout << "Can't open file!\n";
+    // else
+    //   std::cout<<"File open successfully!\n";
 
     for(int i=0; i < size; ++i)
     {
@@ -499,6 +507,10 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
       
       // newFile << gridMap.getValue(i) << ',';
       
+      // if (i%512==0)
+      // {
+      //   newFile << '\n';
+      // }
 
     }
     // newFile.close();

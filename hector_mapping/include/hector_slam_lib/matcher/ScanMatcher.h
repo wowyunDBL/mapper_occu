@@ -70,8 +70,9 @@ public:
       Eigen::Vector3f beginEstimateMap(gridMapUtil.getMapCoordsPose(beginEstimateWorld));
 
       Eigen::Vector3f estimate(beginEstimateMap);
-
+      // std::cout << "in matchData" << '\n';
       estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
+      // std::cout << "out matchData" << '\n';
       //bool notConverged = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
 
       /*
@@ -88,12 +89,12 @@ public:
       //std::cout << "\n cond: " << cond << " det: " << determinant << "\n";
 
 
-      int numIter = maxIterations;
-
+      // int numIter = maxIterations;
+      int numIter = 1;
 
       for (int i = 0; i < numIter; ++i) {
         //std::cout << "\nest:\n" << estimate;
-
+        // std::cout << "i:" << i << '\n';
         estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
         //notConverged = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
 
@@ -193,28 +194,49 @@ protected:
 
   bool estimateTransformationLogLh(Eigen::Vector3f& estimate, ConcreteOccGridMapUtil& gridMapUtil, const DataContainer& dataPoints)
   {
+    // std::cout << "estimate" << estimate  << "\n";
     gridMapUtil.getCompleteHessianDerivs(estimate, dataPoints, H, dTr);
-    //std::cout << "\nH\n" << H  << "\n";
+    // std::cout << "\nH\n" << H  << "\n";
     //std::cout << "\ndTr\n" << dTr  << "\n";
 
 
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
 
-
+      bool flag = true;
       //H += Eigen::Matrix3f::Identity() * 1.0f;
-      Eigen::Vector3f searchDir (H.inverse() * dTr);
-
-      std::cout << "\n in estimateTransformationLogLh: searchdir: " << searchDir  << "\n";
+      Eigen::Matrix3f H_inverse ( H.inverse() );
+      if ( isnan(H_inverse(0,0)) ){
+        std::cout << "result is nan" << '\n';
+        std::cout << "H: " << H << '\n';
+        std::cout << "result is nan: noooot update\n";
+        return false;
+      }
+      Eigen::Vector3f searchDir ( H_inverse * dTr );
+      
+      std::cout << "in estimateTransformationLogLh: searchdir(mapCoord): " << searchDir  << "\n";
 
       if (searchDir[2] > 0.2f) {
+        flag = false;
         searchDir[2] = 0.2f;
         std::cout << "SearchDir angle change too large\n";
       } else if (searchDir[2] < -0.2f) {
+        flag = false;
         searchDir[2] = -0.2f;
         std::cout << "SearchDir angle change too large\n";
       }
 
-      updateEstimatedPose(estimate, searchDir);
+      if (searchDir[0] > 1*20 || searchDir[1] > 1*20) {   // 1m = 20 grids
+        flag = false;
+        std::cout << "SearchDir distance change too large\n";
+      }
+
+      if (flag){
+        std::cout << "ok to update\n";
+        updateEstimatedPose(estimate, searchDir);
+      }
+      else{
+        std::cout << "noooot update\n";
+      }
       return true;
     }
     return false;
@@ -222,6 +244,7 @@ protected:
 
   void updateEstimatedPose(Eigen::Vector3f& estimate, const Eigen::Vector3f& change)
   {
+    // std::cout<<"updateEstimatedPose: " << estimate << '\n';
     estimate += change;
   }
 
