@@ -58,7 +58,7 @@ public:
     mapRep = new MapRepMultiMap(mapResolution, mapSizeX, mapSizeY, multi_res_size, startCoords, drawInterfaceIn, debugInterfaceIn);
 
     this->reset();
-    this->initial_map_from_csv();
+    //this->initial_map_from_csv();
 
     this->setMapUpdateMinDistDiff(0.4f *1.0f);
     this->setMapUpdateMinAngleDiff(0.13f * 1.0f);

@@ -90,7 +90,7 @@ public:
 
 
       // int numIter = maxIterations;
-      int numIter = 1;
+      int numIter = 3;
 
       for (int i = 0; i < numIter; ++i) {
         //std::cout << "\nest:\n" << estimate;
@@ -198,11 +198,11 @@ protected:
     gridMapUtil.getCompleteHessianDerivs(estimate, dataPoints, H, dTr);
     // std::cout << "\nH\n" << H  << "\n";
     //std::cout << "\ndTr\n" << dTr  << "\n";
-
+    bool flag = true;
 
     if ((H(0, 0) != 0.0f) && (H(1, 1) != 0.0f)) {
 
-      bool flag = true;
+      
       //H += Eigen::Matrix3f::Identity() * 1.0f;
       Eigen::Matrix3f H_inverse ( H.inverse() );
       if ( isnan(H_inverse(0,0)) ){
@@ -235,10 +235,11 @@ protected:
         updateEstimatedPose(estimate, searchDir);
       }
       else{
-        std::cout << "noooot update\n";
+        std::cout << "noooot update, searchDir too large\n";
       }
       return true;
     }
+    std::cout << "noooot update, H=0\n";
     return false;
   }
 

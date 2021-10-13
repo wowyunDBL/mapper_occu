@@ -42,6 +42,7 @@ public:
   virtual ~MapRepresentationInterface() {};
 
   virtual void reset() = 0;
+  virtual void initial_map_from_csv() = 0;
 
   virtual float getScaleToMap() const = 0;
 

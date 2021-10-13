@@ -89,7 +89,7 @@ public:
     }
   }
 
-  void initial_map_from_csv()
+  virtual void initial_map_from_csv()
   {
     unsigned int size = mapContainer.size();
 

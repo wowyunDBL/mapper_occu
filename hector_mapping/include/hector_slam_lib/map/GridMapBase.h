@@ -71,13 +71,32 @@ public:
     this->clear();
   }
 
-  void initial_map_from_csv()
+  virtual void initial_map_from_csv()
   {
-    int size = this->getSizeX() * this->getSizeY();
-    for (int i=0; i<size; i++)
-    {
-      this->mapArray[i].set();
-    }
+    // int size = this->getSizeX() * this->getSizeY();
+
+    // string instruction;
+    // vector<string> myString;
+    // ifstream inFile;
+    // inFile.open("/home/110-1/211010_scanMatching/gridValue.csv");
+    // if (inFile.is_open())
+    // {
+    //   std::cout << "reading gridValue.csv" << std::endl;
+    //   //Read until no more lines in text file to read
+    //   while ( getline(inFile, instruction, ',') )
+    //   {
+    //     myString.push_back(instruction);
+    //     std::cout << instruction << '\n';
+    //   }
+    // }
+    // else {
+    //   std::cout<< "error opening gridValue.csv" << std::endl;
+    // }
+
+    // for (int i=0; i<size; i++)
+    // {
+    //   this->mapArray[i].set();
+    // }
   }
 
   /**

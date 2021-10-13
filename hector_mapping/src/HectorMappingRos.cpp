@@ -223,7 +223,7 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
 {
   bool flag=false;
   count+=1;
-  std::cout << "******* New Callback *******" << count << '\n';
+  std::cout << "\n******* New Callback *******" << count << '\n';
   // if (count >2)
   //   return;
   if (pause_scan_processing_)
@@ -336,7 +336,11 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     // If "p_map_with_known_poses_" is enabled, we assume that start_estimate is precise and doesn't need to be refined
     if (p_map_with_known_poses_)
     {
-      if (!flag)  /**/
+      slamProcessor->update(laserScanContainer, start_estimate, true);
+    }
+    else
+    {
+      if (!flag)  
       {
       std::cout << "with_known_poses(no < 7m), total size is: " << size <<"; matching size is: " << c << '\n';
       slamProcessor->update(laserScanContainer, start_estimate, true);
@@ -345,12 +349,6 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
         std::cout << "scan matching..., total size is:  " << size <<"; matching size is: " << c <<'\n';
         slamProcessor->update(laserScanContainer, start_estimate);
       }
-    }
-    else
-    {
-      std::cout << "scan callback!" << count << '\n';
-      std::cout << "start_estimate: " << start_estimate << '\n';
-      slamProcessor->update(laserScanContainer, start_estimate);
     }
   }
 
