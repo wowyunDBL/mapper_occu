@@ -214,7 +214,7 @@ public:
       bresenham2D(abs_dy, abs_dx, error_x, offset_dy, offset_dx, startOffset);
     }
     // std::cout << " setOcc! " << abs_dx <<' ' << abs_dy <<"\n";
-    if(abs_dx*abs_dx+abs_dy*abs_dy < (7*20)*(7*20) )  // this is in grid lenght!!!!
+    if(abs_dx*abs_dx+abs_dy*abs_dy < (6.8*20)*(6.8*20) )  // this is in grid lenght!!!!
     {
       
       unsigned int endOffset = endMap.y() * this->sizeX + endMap.x();
