@@ -212,6 +212,12 @@ protected:
         return false;
       }
       Eigen::Vector3f searchDir ( H_inverse * dTr );
+      if ( isnan(searchDir(0)) ){
+        std::cout << "result is nan" << '\n';
+        std::cout << "H: " << H << '\n';
+        std::cout << "result is nan: noooot update\n";
+        return false;
+      }
       
       std::cout << "in estimateTransformationLogLh: searchdir(mapCoord): " << searchDir  << "\n";
 

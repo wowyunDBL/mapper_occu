@@ -483,18 +483,39 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
     //   std::cout << "Can't open file!\n";
     // else
     //   std::cout<<"File open successfully!\n";
-
+    double grid_value;
     for(int i=0; i < size; ++i)
     {
-      if(gridMap.isFree(i))
+      // if(gridMap.isFree(i))
+      // {
+      //   data[i] = 0;
+      // }
+      // else if (gridMap.isOccupied(i))
+      // {
+      //   data[i] = 100;
+      // }
+      grid_value = gridMap.getValue(i);
+      if (grid_value < 0)
       {
         data[i] = 0;
       }
-      else if (gridMap.isOccupied(i))
+      else if (grid_value == 0)
+      {
+        data[i] = -1;
+      }
+      else if(grid_value < 20)
+      {
+        data[i] = 20;
+      }
+      else if (grid_value < 40)
+      {
+        data[i] = 40;
+      }
+
+      else if (grid_value > 40)
       {
         data[i] = 100;
       }
-
       /* 8 
       std::vector<std::double> grid_value_list;
       grid_value_list.push_back(gridMap.getValue(i));
