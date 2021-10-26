@@ -106,7 +106,7 @@ public:
         }
 
         if(debugInterface){
-          debugInterface->addHessianMatrix(H);
+          debugInterface->addHessianMatrix(H, matching_cost);
         }
       }
 
@@ -195,7 +195,7 @@ protected:
   bool estimateTransformationLogLh(Eigen::Vector3f& estimate, ConcreteOccGridMapUtil& gridMapUtil, const DataContainer& dataPoints)
   {
     // std::cout << "estimate" << estimate  << "\n";
-    gridMapUtil.getCompleteHessianDerivs(estimate, dataPoints, H, dTr);
+    gridMapUtil.getCompleteHessianDerivs(estimate, dataPoints, H, dTr, matching_cost);
     // std::cout << "\nH\n" << H  << "\n";
     //std::cout << "\ndTr\n" << dTr  << "\n";
     bool flag = true;
@@ -205,16 +205,16 @@ protected:
       
       //H += Eigen::Matrix3f::Identity() * 1.0f;
       Eigen::Matrix3f H_inverse ( H.inverse() );
-      if ( isnan(H_inverse(0,0)) ){
-        std::cout << "result is nan" << '\n';
+      if ( isnan( std::abs(H_inverse(0,0)) ) ){  
+        std::cout << "H result is nan" << '\n';
         std::cout << "H: " << H << '\n';
         std::cout << "result is nan: noooot update\n";
         return false;
       }
       Eigen::Vector3f searchDir ( H_inverse * dTr );
-      if ( isnan(searchDir(0)) ){
-        std::cout << "result is nan" << '\n';
-        std::cout << "H: " << H << '\n';
+      if ( isnan( std::abs(searchDir(0)) ) ){ 
+        std::cout << "searchDir result is nan" << '\n';
+        std::cout << "searchDir: " << searchDir << '\n';
         std::cout << "result is nan: noooot update\n";
         return false;
       }
@@ -222,27 +222,26 @@ protected:
       std::cout << "in estimateTransformationLogLh: searchdir(mapCoord): " << searchDir  << "\n";
 
       if (searchDir[2] > 0.2f) {
-        flag = false;
+        // flag = false;
         searchDir[2] = 0.2f;
         std::cout << "SearchDir angle change too large\n";
+        return false;
       } else if (searchDir[2] < -0.2f) {
-        flag = false;
+        // flag = false;
         searchDir[2] = -0.2f;
         std::cout << "SearchDir angle change too large\n";
+        return false;
       }
 
-      if (searchDir[0] > 1*20 || searchDir[1] > 1*20) {   // 1m = 20 grids
-        flag = false;
+      if ( (searchDir[0]*searchDir[0]+searchDir[1]*searchDir[1]) > 1*20*20) {   // 1m = 20 grids
+        // flag = false;
         std::cout << "SearchDir distance change too large\n";
+        return false;
       }
 
-      if (flag){
-        std::cout << "ok to update\n";
-        updateEstimatedPose(estimate, searchDir);
-      }
-      else{
-        std::cout << "noooot update, searchDir too large\n";
-      }
+      std::cout << "ok to update\n";
+      updateEstimatedPose(estimate, searchDir);
+      
       return true;
     }
     std::cout << "noooot update, H=0\n";
@@ -271,6 +270,7 @@ protected:
 protected:
   Eigen::Vector3f dTr;
   Eigen::Matrix3f H;
+  float matching_cost;
 
   DrawInterface* drawInterface;
   HectorDebugInfoInterface* debugInterface;

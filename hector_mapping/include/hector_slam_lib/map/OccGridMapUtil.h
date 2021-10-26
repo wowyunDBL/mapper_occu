@@ -242,7 +242,7 @@ public:
 
   }
 
-  void getCompleteHessianDerivs(const Eigen::Vector3f& pose, const DataContainer& dataPoints, Eigen::Matrix3f& H, Eigen::Vector3f& dTr)
+  void getCompleteHessianDerivs(const Eigen::Vector3f& pose, const DataContainer& dataPoints, Eigen::Matrix3f& H, Eigen::Vector3f& dTr, float& matching_cost)
   {
     int size = dataPoints.getSize();
     // std::cout << "in getCompleteHessianDerivs: dataPoints number: " << size << '\n';
@@ -263,6 +263,7 @@ public:
       
       if (currPoint.norm() > 6.8*20){
         // std::cout<<"exceed range!" << '\n';
+        // do not update!
         continue;
       }
       // std::cout<<currPoint.norm() << '\n';
@@ -288,6 +289,7 @@ public:
       H(1, 2) += transformedPointData[2] * rotDeriv;
     }
     std::cout << "cost: " << cost << '\n';
+    matching_cost = cost;
     H(1, 0) = H(0, 1);
     H(2, 0) = H(0, 2);
     H(2, 1) = H(1, 2);

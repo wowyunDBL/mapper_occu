@@ -45,8 +45,7 @@
 #endif
 
 HectorMappingRos::HectorMappingRos()
-  : debugInfoProvider(0)
-  , hectorDrawings(0)
+  : hectorDrawings(0)
   , lastGetMapUpdateIndex(-100)
   , tfB_(0)
   , map__publish_thread_(0)
@@ -57,6 +56,7 @@ HectorMappingRos::HectorMappingRos()
   //
   ros::NodeHandle private_nh_("~");
   //hectorDrawings();
+  debugInfoProvider = new debugInfoProvider;  //debugInfoProvider(0),
 
   std::string mapTopic_ = "map";
 

@@ -55,27 +55,27 @@ public:
   }
 
 
-  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian)
+  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian, const float& matching_cost)
   {
     hector_mapping::HectorIterData iterData;
 
     for (int i=0; i < 9; ++i){
       iterData.hessian[i] = static_cast<double>(hessian.data()[i]);
-      iterData.determinant = hessian.determinant();
+      // iterData.determinant = hessian.determinant();
 
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(hessian);
+      // Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> eig(hessian);
 
-      const Eigen::Vector3f& eigValues (eig.eigenvalues());
-      iterData.conditionNum = eigValues[2] / eigValues[0];
+      // const Eigen::Vector3f& eigValues (eig.eigenvalues());
+      // iterData.conditionNum = eigValues[2] / eigValues[0];
 
 
-      iterData.determinant2d = hessian.block<2,2>(0,0).determinant();
-      Eigen::SelfAdjointEigenSolver<Eigen::Matrix2f> eig2d(hessian.block<2,2>(0,0));
+      // iterData.determinant2d = hessian.block<2,2>(0,0).determinant();
+      // Eigen::SelfAdjointEigenSolver<Eigen::Matrix2f> eig2d(hessian.block<2,2>(0,0));
 
-      const Eigen::Vector2f& eigValues2d (eig2d.eigenvalues());
-      iterData.conditionNum2d = eigValues2d[1] / eigValues2d[0];
+      // const Eigen::Vector2f& eigValues2d (eig2d.eigenvalues());
+      // iterData.conditionNum2d = eigValues2d[1] / eigValues2d[0];
     }
-
+    iterData.cost = matching_cost;
     debugInfo.iterData.push_back(iterData);
   }
 
