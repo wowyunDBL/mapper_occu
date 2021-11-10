@@ -56,7 +56,7 @@ HectorMappingRos::HectorMappingRos()
   //
   ros::NodeHandle private_nh_("~");
   //hectorDrawings();
-  debugInfoProvider = new debugInfoProvider;  //debugInfoProvider(0),
+  debugInfoProvider = new HectorDebugInfoProvider;  //debugInfoProvider(0),
 
   std::string mapTopic_ = "map";
 
