@@ -79,7 +79,8 @@ public:
         // std::cout << "poseHintWorld: " << poseHintWorld << '\n';
         newPoseEstimateWorld = (mapRep->matchData(poseHintWorld, dataContainer, lastScanMatchCov));
         std::cout<<"final updated pose: " << newPoseEstimateWorld << '\n';
-    }else{
+    }
+    else{
         newPoseEstimateWorld = poseHintWorld;
     }
 
