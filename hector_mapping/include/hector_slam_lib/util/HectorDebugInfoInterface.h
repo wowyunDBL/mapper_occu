@@ -32,8 +32,8 @@
 class HectorDebugInfoInterface{
 public:
 
-  virtual void sendAndResetData() = 0;
-  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian, const float& matching_cost) = 0; 
+  virtual void sendAndResetData() = 0; 
+  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian, const float& matching_cost, const int& eflag) = 0; 
   virtual void addPoseLikelihood(float lh) = 0;
 };
 

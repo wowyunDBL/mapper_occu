@@ -55,7 +55,7 @@ public:
   }
 
 
-  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian, const float& matching_cost)
+  virtual void addHessianMatrix(const Eigen::Matrix3f& hessian, const float& matching_cost, const int& eflag)
   {
     hector_mapping::HectorIterData iterData;
 
@@ -76,6 +76,7 @@ public:
       // iterData.conditionNum2d = eigValues2d[1] / eigValues2d[0];
     }
     iterData.cost = matching_cost;
+    iterData.eflag = eflag;
     debugInfo.iterData.push_back(iterData);
   }
 

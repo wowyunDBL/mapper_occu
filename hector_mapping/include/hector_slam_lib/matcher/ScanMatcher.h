@@ -53,6 +53,7 @@ public:
 
   Eigen::Vector3f matchData(const Eigen::Vector3f& beginEstimateWorld, ConcreteOccGridMapUtil& gridMapUtil, const DataContainer& dataContainer, Eigen::Matrix3f& covMatrix, int maxIterations)
   {
+    int eflag=0;
     if (drawInterface){
       drawInterface->setScale(0.05f);
       drawInterface->setColor(0.0f,1.0f, 0.0f);
@@ -71,7 +72,11 @@ public:
 
       Eigen::Vector3f estimate(beginEstimateMap);
       // std::cout << "in matchData" << '\n';
-      estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
+      eflag = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
+
+      if(debugInterface){
+        debugInterface->addHessianMatrix(H, matching_cost, eflag);
+      }
       // std::cout << "out matchData" << '\n';
       //bool notConverged = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
 
@@ -90,12 +95,12 @@ public:
 
 
       // int numIter = maxIterations;
-      int numIter = 3;
+      int numIter = 2;
 
       for (int i = 0; i < numIter; ++i) {
         //std::cout << "\nest:\n" << estimate;
         // std::cout << "i:" << i << '\n';
-        estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
+        eflag = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
         //notConverged = estimateTransformationLogLh(estimate, gridMapUtil, dataContainer);
 
         if(drawInterface){
@@ -106,7 +111,7 @@ public:
         }
 
         if(debugInterface){
-          debugInterface->addHessianMatrix(H, matching_cost);
+          debugInterface->addHessianMatrix(H, matching_cost, eflag);
         }
       }
 
@@ -192,7 +197,7 @@ public:
 
 protected:
 
-  bool estimateTransformationLogLh(Eigen::Vector3f& estimate, ConcreteOccGridMapUtil& gridMapUtil, const DataContainer& dataPoints)
+  int estimateTransformationLogLh(Eigen::Vector3f& estimate, ConcreteOccGridMapUtil& gridMapUtil, const DataContainer& dataPoints)
   {
     // std::cout << "estimate" << estimate  << "\n";
     gridMapUtil.getCompleteHessianDerivs(estimate, dataPoints, H, dTr, matching_cost);
@@ -209,14 +214,14 @@ protected:
         std::cout << "H result is nan" << '\n';
         std::cout << "H: " << H << '\n';
         std::cout << "result is nan: noooot update\n";
-        return false;
+        return 1;
       }
       Eigen::Vector3f searchDir ( H_inverse * dTr );
       if ( isnan( std::abs(searchDir(0)) ) ){ 
         std::cout << "searchDir result is nan" << '\n';
         std::cout << "searchDir: " << searchDir << '\n';
         std::cout << "result is nan: noooot update\n";
-        return false;
+        return 2;
       }
       
       std::cout << "in estimateTransformationLogLh: searchdir(mapCoord): " << searchDir  << "\n";
@@ -225,27 +230,27 @@ protected:
         // flag = false;
         searchDir[2] = 0.2f;
         std::cout << "SearchDir angle change too large\n";
-        return false;
+        return 3;
       } else if (searchDir[2] < -0.2f) {
         // flag = false;
         searchDir[2] = -0.2f;
         std::cout << "SearchDir angle change too large\n";
-        return false;
+        return 3;
       }
 
       if ( (searchDir[0]*searchDir[0]+searchDir[1]*searchDir[1]) > 1*20*20) {   // 1m = 20 grids
         // flag = false;
         std::cout << "SearchDir distance change too large\n";
-        return false;
+        return 4;
       }
 
       std::cout << "ok to update\n";
       updateEstimatedPose(estimate, searchDir);
       
-      return true;
+      return 10;
     }
     std::cout << "noooot update, H=0\n";
-    return false;
+    return 5;
   }
 
   void updateEstimatedPose(Eigen::Vector3f& estimate, const Eigen::Vector3f& change)
