@@ -168,72 +168,7 @@ public:
       plugin_vector_[i]->draw(&geotiff_writer_);
     }
 
-    /**
-      * No Victims for now, first  agree on a common standard for representation
-      */
-    /*
-    if (req_object_model_){
-      worldmodel_msgs::GetObjectModel srv_objects;
-      if (object_service_client_.call(srv_objects))
-      {
-        ROS_INFO("GeotiffNode: Object service called successfully");
-
-        const worldmodel_msgs::ObjectModel& objects_model (srv_objects.response.model);
-
-        size_t size = objects_model.objects.size();
-
-
-        unsigned int victim_num  = 1;
-
-        for (size_t i = 0; i < size; ++i){
-          const worldmodel_msgs::Object& object (objects_model.objects[i]);
-
-          if (object.state.state == worldmodel_msgs::ObjectState::CONFIRMED){
-            geotiff_writer_.drawVictim(Eigen::Vector2f(object.pose.pose.position.x,object.pose.pose.position.y),victim_num);
-            victim_num++;
-          }
-        }
-      }
-      else
-      {
-        ROS_ERROR("Failed to call objects service");
-      }
-    }
-    */
-
-    /*
-    hector_nav_msgs::GetRobotTrajectory srv_path;
-
-    if (path_service_client_.call(srv_path))
-    {
-      ROS_INFO("GeotiffNode: Path service called successfully");
-
-      std::vector<geometry_msgs::PoseStamped>& traj_vector (srv_path.response.trajectory.poses);
-
-      size_t size = traj_vector.size();
-
-      std::vector<Eigen::Vector2f> pointVec;
-      pointVec.resize(size);
-
-      for (size_t i = 0; i < size; ++i){
-        const geometry_msgs::PoseStamped& pose (traj_vector[i]);
-
-        pointVec[i] = Eigen::Vector2f(pose.pose.position.x, pose.pose.position.y);
-      }
-
-      if (size > 0){
-        //Eigen::Vector3f startVec(pose_vector[0].x,pose_vector[0].y,pose_vector[0].z);
-        Eigen::Vector3f startVec(pointVec[0].x(),pointVec[0].y(),0.0f);
-        geotiff_writer_.drawPath(startVec, pointVec);
-      }
-    }
-    else
-    {
-      ROS_ERROR("Failed to call path service");
-    }
-    */
-
-
+    
     geotiff_writer_.writeGeotiffImage();
     running_saved_map_num_++;
 

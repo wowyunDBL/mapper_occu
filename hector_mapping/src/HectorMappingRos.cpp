@@ -312,8 +312,6 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
       start_estimate = slamProcessor->getLastScanMatchPose();
     }
 
-    
-
     // If "p_map_with_known_poses_" is enabled, we assume that start_estimate is precise and doesn't need to be refined
     if (p_map_with_known_poses_)
     {
@@ -321,7 +319,7 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     }
     else
     {
-      if (!flag)  
+      if (!flag_enough_insideNum)  
       {
       // std::cout << "with_known_poses(no < 7m), total size is: " << size <<"; matching size is: " << c << '\n';
       slamProcessor->update(laserScanContainer, start_estimate, true);
@@ -347,39 +345,10 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
   poseUpdatePublisher_.publish(poseInfoContainer_.getPoseWithCovarianceStamped());
   posePublisher_.publish(poseInfoContainer_.getPoseStamped());
 
-  // Publish odometry if enabled
-  if(p_pub_odometry_)
-  {
-    nav_msgs::Odometry tmp;
-    tmp.pose = poseInfoContainer_.getPoseWithCovarianceStamped().pose;
-
-    tmp.header = poseInfoContainer_.getPoseWithCovarianceStamped().header;
-    tmp.child_frame_id = p_base_frame_;
-    odometryPublisher_.publish(tmp);
-  }
-
-  // Publish the map->odom transform if enabled
-  if (p_pub_map_odom_transform_)
-  {
-    tf::StampedTransform odom_to_base;
-    try
-    {
-      tf_.waitForTransform(p_odom_frame_, p_base_frame_, scan.header.stamp, ros::Duration(0.5));
-      tf_.lookupTransform(p_odom_frame_, p_base_frame_, scan.header.stamp, odom_to_base);
-    }
-    catch(tf::TransformException e)
-    {
-      ROS_ERROR("Transform failed during publishing of map_odom transform: %s",e.what());
-      odom_to_base.setIdentity();
-    }
-    map_to_odom_ = tf::Transform(poseInfoContainer_.getTfTransform() * odom_to_base.inverse());
-    tfB_->sendTransform( tf::StampedTransform (map_to_odom_, scan.header.stamp, p_map_frame_, p_odom_frame_));
-  }
-
   // Publish the transform from map to estimated pose (if enabled)
   if (p_pub_map_scanmatch_transform_)
   {
-    tfB_->sendTransform( tf::StampedTransform(poseInfoContainer_.getTfTransform(), scan.header.stamp, p_map_frame_, p_tf_map_scanmatch_transform_frame_name_));
+    tfB_->sendTransform( tf::StampedTransform(poseInfoContainer_.getTfTransform(), scan.header.stamp, p_map_frame_, p_tf_map_scanmatch_transform_frame_name_) );
   }
 }
 
@@ -563,9 +532,8 @@ void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointClou
   dataContainer.clear();
 
   tf::Vector3 laserPos (laserTransform.getOrigin());
-  dataContainer.setOrigo(Eigen::Vector2f(laserPos.x(), laserPos.y())*scaleToMap);
-  std::cout << "here: " << laserPos.x()<< " " << laserPos.y() << std::endl;
-
+  dataContainer.setOrigo(Eigen::Vector2f(laserPos.x(), laserPos.y())*scaleToMap); // 0.26,0
+  
   for (size_t i = 0; i < size; ++i)
   {
     const geometry_msgs::Point32& currPoint(pointCloud.points[i]); //EX: 5.37483 4.48455
