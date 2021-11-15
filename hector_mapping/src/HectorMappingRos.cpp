@@ -433,7 +433,7 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
     //   std::cout << "Can't open file!\n";
     // else
     //   std::cout<<"File open successfully!\n";
-    double grid_value;
+    double grid_value, grid_odds, grid_prob;
     for(int i=0; i < size; ++i)
     {
       // if(gridMap.isFree(i))
@@ -445,24 +445,29 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
       //   data[i] = 100;
       // }
       grid_value = gridMap.getValue(i);
+      //grid_prob = gridMap.getGridProbability(i);
+      grid_odds = exp(grid_value);
+      grid_prob = grid_odds / (grid_odds + 1.0f);
       if (grid_value < 0)
       {
         data[i] = 0;
       }
-      else if (grid_value == 0)
+
+      if (grid_value == 0)
       {
         data[i] = -1;
       }
-      else if(grid_value < 20)
+      
+      else if(grid_prob < 0.6)
       {
         data[i] = 20;
       }
-      else if (grid_value < 40)
+      else if (grid_prob < 0.7)
       {
-        data[i] = 40;
+        data[i] = 60;
       }
 
-      else if (grid_value > 40)
+      else if (grid_prob > 0.9)
       {
         data[i] = 100;
       }

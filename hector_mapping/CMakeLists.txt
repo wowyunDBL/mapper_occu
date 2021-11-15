@@ -66,7 +66,10 @@ add_executable(hector_mapping
   src/main.cpp
   src/PoseInfoContainer.cpp
   src/PoseInfoContainer.h
+  
 )
+
+
 
 add_dependencies(hector_mapping hector_mapping_generate_messages_cpp)
 
