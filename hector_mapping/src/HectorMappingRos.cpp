@@ -323,11 +323,11 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     {
       if (!flag)  
       {
-      std::cout << "with_known_poses(no < 7m), total size is: " << size <<"; matching size is: " << c << '\n';
+      // std::cout << "with_known_poses(no < 7m), total size is: " << size <<"; matching size is: " << c << '\n';
       slamProcessor->update(laserScanContainer, start_estimate, true);
       }
       else{
-        std::cout << "scan matching..., total size is:  " << size <<"; matching size is: " << c <<'\n';
+        // std::cout << "scan matching..., total size is:  " << size <<"; matching size is: " << c <<'\n';
         slamProcessor->update(laserScanContainer, start_estimate);
       }
     }
@@ -564,7 +564,7 @@ void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointClou
 
   tf::Vector3 laserPos (laserTransform.getOrigin());
   dataContainer.setOrigo(Eigen::Vector2f(laserPos.x(), laserPos.y())*scaleToMap);
-  std::cout << "here: " << laserPos.x(), laserPos.y() << std::endl;
+  std::cout << "here: " << laserPos.x()<< " " << laserPos.y() << std::endl;
 
   for (size_t i = 0; i < size; ++i)
   {
