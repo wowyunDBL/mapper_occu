@@ -255,7 +255,7 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     {
       tf_.lookupTransform(p_base_frame_, scan.header.frame_id, scan.header.stamp, laser_transform);
       if (count == 1)
-        std::cout << "lookupTransform "<< p_base_frame_.c_str() <<" to "<< scan.header.frame_id.c_str() <<" is " << laser_transform  << std::endl;
+        std::cout << "lookupTransform "<< p_base_frame_.c_str() <<" to "<< scan.header.frame_id.c_str() <<" is " << laser_transform.getOrigin()  << std::endl;
     }
     else
     {
@@ -582,11 +582,9 @@ void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointClou
 
   for (size_t i = 0; i < size; ++i)
   {
-    const geometry_msgs::Point32& currPoint(pointCloud.points[i]);
-    std::cout<< "<rosPointCloudToDataContainer> origin point: " << currPoint << std::endl;
-    
-    tf::Vector3 pointPosBaseFrame(laserTransform * tf::Vector3(currPoint.x, currPoint.y, currPoint.z));
-    std::cout<< "<rosPointCloudToDataContainer> pointPosBaseFrame: " << pointPosBaseFrame << std::endl;
+    const geometry_msgs::Point32& currPoint(pointCloud.points[i]); //EX: 5.37483 4.48455
+        
+    tf::Vector3 pointPosBaseFrame(laserTransform * tf::Vector3(currPoint.x, currPoint.y, currPoint.z)); //EX: 5.63483 4.48455
 
     dataContainer.add( Eigen::Vector2f(pointPosBaseFrame.x(),pointPosBaseFrame.y())*scaleToMap );
   
