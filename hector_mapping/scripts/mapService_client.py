@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
-from __future__ import print_function
+from std_srvs.srv import Trigger
 
-import nav_msgs.GetMap.srv  
 import rospy
 
 
 
 def occupancy_map_client():
-    rospy.wait_for_service('mapCallback')
+    rospy.wait_for_service('reset_map')
     try:
-        mapCallback_handler = rospy.ServiceProxy('mapCallback', GetMap)
-        map = mapCallback_handler()
-        
+        mapCallback_handler = rospy.ServiceProxy('reset_map', Trigger)
+        resp = mapCallback_handler()
+        return resp.success
 
     except rospy.ServiceException as e:
         print("Service call failed: %s"%e)
