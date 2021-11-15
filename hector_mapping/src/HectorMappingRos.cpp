@@ -273,7 +273,10 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     }
 
     // Convert the point cloud to our data container
-    this->rosPointCloudToDataContainer(laser_point_cloud_, laser_transform, laserScanContainer, slamProcessor->getScaleToMap());
+    int size = laserScanContainer.getSize();
+    bool flag_enough_insideNum = false;
+
+    this->rosPointCloudToDataContainer(laser_point_cloud_, laser_transform, laserScanContainer, slamProcessor->getScaleToMap(), flag_enough_insideNum);
     
 
     // Now let's choose the initial pose estimate for our slam process update
@@ -309,26 +312,7 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
       start_estimate = slamProcessor->getLastScanMatchPose();
     }
 
-    int size = laserScanContainer.getSize();
-    /*int size = 0;
-    for (int i = 0; i < size_total; ++i) {
-      const Eigen::Vector2f& currPoint (laserScanContainer.getVecEntry(i));
-      if (currPoint.norm() < 100)
-        size += 1;
-    }*/
-    /*std::cout<<"size is: " << size << '\n';*/
     
-    int c =0;
-    for (int i=0;i<size;i++){
-      const Eigen::Vector2f& currPoint (laserScanContainer.getVecEntry(i));
-      if (currPoint.norm() < 6.8*20){
-        c += 1;
-        if (c > 10){
-          flag = true;
-          break;
-        }
-      }
-    }
 
     // If "p_map_with_known_poses_" is enabled, we assume that start_estimate is precise and doesn't need to be refined
     if (p_map_with_known_poses_)
@@ -570,15 +554,17 @@ void HectorMappingRos::rosLaserScanToDataContainer(const sensor_msgs::LaserScan&
   }
 }
 
-void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointCloud& pointCloud, const tf::StampedTransform& laserTransform, hectorslam::DataContainer& dataContainer, float scaleToMap)
+void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointCloud& pointCloud, const tf::StampedTransform& laserTransform, hectorslam::DataContainer& dataContainer, float scaleToMap, bool& flag_enough_insideNum)
 {
   size_t size = pointCloud.points.size();
-  ROS_INFO("<rosPointCloudToDataContainer> size: %d", size);
+  int count_inside_range = 0;
+  // ROS_INFO("<rosPointCloudToDataContainer> size: %d", size);
 
   dataContainer.clear();
 
   tf::Vector3 laserPos (laserTransform.getOrigin());
   dataContainer.setOrigo(Eigen::Vector2f(laserPos.x(), laserPos.y())*scaleToMap);
+  std::cout << "here: " << laserPos.x(), laserPos.y() << std::endl;
 
   for (size_t i = 0; i < size; ++i)
   {
@@ -586,9 +572,13 @@ void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointClou
         
     tf::Vector3 pointPosBaseFrame(laserTransform * tf::Vector3(currPoint.x, currPoint.y, currPoint.z)); //EX: 5.63483 4.48455
 
+    if ( (pointPosBaseFrame.getX()*pointPosBaseFrame.getX() + pointPosBaseFrame.getY()*pointPosBaseFrame.getY()) < p_sqr_laser_max_dist_)
+      count_inside_range += 1;
     dataContainer.add( Eigen::Vector2f(pointPosBaseFrame.x(),pointPosBaseFrame.y())*scaleToMap );
   
   }
+  if (count_inside_range > 10)
+    flag_enough_insideNum = true;
 }
 
 void HectorMappingRos::setServiceGetMapData(nav_msgs::GetMap::Response& map_, const hectorslam::GridMap& gridMap)
