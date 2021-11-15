@@ -458,16 +458,16 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
         data[i] = -1;
       }
       
-      else if(grid_prob < 0.6)
+      else if(grid_prob > 0.5 && grid_prob < 0.85)
       {
         data[i] = 20;
       }
-      else if (grid_prob < 0.7)
+      else if (grid_prob > 0.85 && grid_prob < 0.95)
       {
         data[i] = 60;
       }
 
-      else if (grid_prob > 0.9)
+      else if (grid_prob > 0.95)
       {
         data[i] = 100;
       }
@@ -571,21 +571,6 @@ void HectorMappingRos::setServiceGetMapData(nav_msgs::GetMap::Response& map_, co
   map_.map.header.frame_id = p_map_frame_;
   map_.map.data.resize(map_.map.info.width * map_.map.info.height);
 }
-
-/*
-void HectorMappingRos::setStaticMapData(const nav_msgs::OccupancyGrid& map)
-{
-  float cell_length = map.info.resolution;
-  Eigen::Vector2f mapOrigin (map.info.origin.position.x + cell_length*0.5f,
-                             map.info.origin.position.y + cell_length*0.5f);
-
-  int map_size_x = map.info.width;
-  int map_size_y = map.info.height;
-
-  slamProcessor = new hectorslam::HectorSlamProcessor(cell_length, map_size_x, map_size_y, Eigen::Vector2f(0.0f, 0.0f), 1, hectorDrawings, debugInfoProvider);
-}
-*/
-
 
 void HectorMappingRos::publishMapLoop(double map_pub_period)
 {

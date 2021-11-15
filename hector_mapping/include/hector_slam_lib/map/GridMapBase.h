@@ -95,7 +95,7 @@ public:
 
     // for (int i=0; i<size; i++)
     // {
-    //   this->mapArray[i].set();
+    //   this->mapArray[i].set(myString[i]);
     // }
   }
 
