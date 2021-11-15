@@ -45,17 +45,16 @@
 #endif
 
 HectorMappingRos::HectorMappingRos()
-  : hectorDrawings(0)
-  , lastGetMapUpdateIndex(-100)
+  : lastGetMapUpdateIndex(-100)
   , tfB_(0)
   , map__publish_thread_(0)
   , initial_pose_set_(false)
   , pause_scan_processing_(false)
-  , count(1)
+  , count(0)
 {
   //
   ros::NodeHandle private_nh_("~");
-  //hectorDrawings();
+  hectorDrawings = new HectorDrawings; //hectorDrawings(0), 
   debugInfoProvider = new HectorDebugInfoProvider;  //debugInfoProvider(0),
 
   std::string mapTopic_ = "map";
@@ -223,9 +222,8 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
 {
   bool flag=false;
   count+=1;
-  std::cout << "\n******* New Callback *******" << count << '\n';
-  // if (count >2)
-  //   return;
+  std::cout << "\n******* New Callback ******* " << count << " times" << '\n';
+  
   if (pause_scan_processing_)
   {
     return;
@@ -253,9 +251,11 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
     // let's get that transform
     const ros::Duration dur(0.5);
     tf::StampedTransform laser_transform;
-    if (tf_.waitForTransform(p_base_frame_, scan.header.frame_id, scan.header.stamp, dur))
+    if (tf_.waitForTransform(p_base_frame_, scan.header.frame_id, scan.header.stamp, dur)) //avoid: Lookup would require extrapolation into the past
     {
       tf_.lookupTransform(p_base_frame_, scan.header.frame_id, scan.header.stamp, laser_transform);
+      if (count == 1)
+        std::cout << "lookupTransform "<< p_base_frame_.c_str() <<" to "<< scan.header.frame_id.c_str() <<" is " << laser_transform  << std::endl;
     }
     else
     {
@@ -274,7 +274,6 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
 
     // Convert the point cloud to our data container
     this->rosPointCloudToDataContainer(laser_point_cloud_, laser_transform, laserScanContainer, slamProcessor->getScaleToMap());
-    
     
 
     // Now let's choose the initial pose estimate for our slam process update
@@ -309,8 +308,6 @@ void HectorMappingRos::scanCallback(const sensor_msgs::LaserScan& scan)
       // If none of the above, the initial pose is simply the last estimated pose
       start_estimate = slamProcessor->getLastScanMatchPose();
     }
-    
-    
 
     int size = laserScanContainer.getSize();
     /*int size = 0;
@@ -576,7 +573,7 @@ void HectorMappingRos::rosLaserScanToDataContainer(const sensor_msgs::LaserScan&
 void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointCloud& pointCloud, const tf::StampedTransform& laserTransform, hectorslam::DataContainer& dataContainer, float scaleToMap)
 {
   size_t size = pointCloud.points.size();
-  //ROS_INFO("size: %d", size);
+  ROS_INFO("<rosPointCloudToDataContainer> size: %d", size);
 
   dataContainer.clear();
 
@@ -585,26 +582,14 @@ void HectorMappingRos::rosPointCloudToDataContainer(const sensor_msgs::PointClou
 
   for (size_t i = 0; i < size; ++i)
   {
-
     const geometry_msgs::Point32& currPoint(pointCloud.points[i]);
+    std::cout<< "<rosPointCloudToDataContainer> origin point: " << currPoint << std::endl;
+    
+    tf::Vector3 pointPosBaseFrame(laserTransform * tf::Vector3(currPoint.x, currPoint.y, currPoint.z));
+    std::cout<< "<rosPointCloudToDataContainer> pointPosBaseFrame: " << pointPosBaseFrame << std::endl;
 
-    float dist_sqr = currPoint.x*currPoint.x + currPoint.y* currPoint.y;
-
-    if ( (dist_sqr > p_sqr_laser_min_dist_) && (dist_sqr < p_sqr_laser_max_dist_) ){
-
-      if ( (currPoint.x < 0.0f) && (dist_sqr < 0.50f)){
-        continue;
-      }
-
-      tf::Vector3 pointPosBaseFrame(laserTransform * tf::Vector3(currPoint.x, currPoint.y, currPoint.z));
-
-      float pointPosLaserFrameZ = pointPosBaseFrame.z() - laserPos.z();
-
-      if (pointPosLaserFrameZ > p_laser_z_min_value_ && pointPosLaserFrameZ < p_laser_z_max_value_)
-      {
-        dataContainer.add(Eigen::Vector2f(pointPosBaseFrame.x(),pointPosBaseFrame.y())*scaleToMap);
-      }
-    }
+    dataContainer.add( Eigen::Vector2f(pointPosBaseFrame.x(),pointPosBaseFrame.y())*scaleToMap );
+  
   }
 }
 

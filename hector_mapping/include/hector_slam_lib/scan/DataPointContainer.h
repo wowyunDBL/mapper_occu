@@ -67,7 +67,7 @@ public:
     dataPoints.clear();
   }
 
-  int getSize() const
+  int getSize() const  // cannot modify class member
   {
     return dataPoints.size();
   }
