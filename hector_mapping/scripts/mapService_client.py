@@ -20,4 +20,4 @@ def occupancy_map_client():
         print("Service call failed: %s \n"%e)
 
 if __name__ == "__main__":
-    print("ok? " + occupancy_map_client())
+    print("suceess or not: " + occupancy_map_client())

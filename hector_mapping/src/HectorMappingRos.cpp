@@ -453,24 +453,54 @@ void HectorMappingRos::publishMap(MapPublisherContainer& mapPublisher, const hec
         data[i] = 0;
       }
 
-      if (grid_value == 0)
+      else if (grid_value == 0)
       {
         data[i] = -1;
       }
       
-      else if(grid_prob > 0.5 && grid_prob < 0.85)
+      else if(grid_value < 10)
+      {
+        data[i] = 10;
+      }
+
+      else if(grid_value < 20)
       {
         data[i] = 20;
       }
-      else if (grid_prob > 0.85 && grid_prob < 0.95)
+
+      else if(grid_value < 30)
       {
-        data[i] = 60;
+        data[i] = 30;
       }
 
-      else if (grid_prob > 0.95)
+      else if(grid_value < 40)
+      {
+        data[i] = 40;
+      }
+
+      else if(grid_value < 50)
+      {
+        data[i] = 50;
+      }
+
+      else 
       {
         data[i] = 100;
       }
+
+      // else if(grid_prob > 0.5 && grid_prob < 0.85)
+      // {
+      //   data[i] = 20;
+      // }
+      // else if (grid_prob > 0.85 && grid_prob < 0.95)
+      // {
+      //   data[i] = 60;
+      // }
+
+      // else if (grid_prob > 0.95)
+      // {
+      //   data[i] = 100;
+      // }
       /* 8 
       std::vector<std::double> grid_value_list;
       grid_value_list.push_back(gridMap.getValue(i));
